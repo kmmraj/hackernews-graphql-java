@@ -1,11 +1,10 @@
 package com.howtographql.hackernews;
 
 import com.coxautodev.graphql.tools.SchemaParser;
-import javax.servlet.annotation.WebServlet;
-
 import graphql.schema.GraphQLSchema;
 import graphql.servlet.SimpleGraphQLServlet;
 
+import javax.servlet.annotation.WebServlet;
 
 @WebServlet(urlPatterns = "/graphql")
 public class GraphQLEndpoint extends SimpleGraphQLServlet {
