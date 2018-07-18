@@ -31,7 +31,8 @@ class GraphQLEndpoint : SimpleGraphQLServlet(buildSchema()) {
             return SchemaParser.newParser()
                     .file("schema.graphqls")
                     .resolvers(Query(linkRepository),
-                            Mutation(linkRepository,userRepository))
+                            Mutation(linkRepository,userRepository),
+                            SigninResolver())
                     .build()
                     .makeExecutableSchema()
         }
