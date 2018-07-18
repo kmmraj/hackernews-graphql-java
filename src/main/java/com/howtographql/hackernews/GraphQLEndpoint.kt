@@ -15,7 +15,8 @@ class GraphQLEndpoint : SimpleGraphQLServlet(buildSchema()) {
             val linkRepository = LinkRepository()
             return SchemaParser.newParser()
                     .file("schema.graphqls")
-                    .resolvers(Query(linkRepository))
+                    .resolvers(Query(linkRepository),
+                            Mutation(linkRepository))
                     .build()
                     .makeExecutableSchema()
         }
