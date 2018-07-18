@@ -24,11 +24,14 @@ class GraphQLEndpoint : SimpleGraphQLServlet(buildSchema()) {
         fun buildSchema(): GraphQLSchema {
             val mongo =  MongoClient().getDatabase("hackernews")
             val linkRepository =   LinkRepository(mongo.getCollection("links"))
-           // val linkRepository = LinkRepository()
+
+            val userRepository = UserRepository(mongo.getCollection("users"))
+
+
             return SchemaParser.newParser()
                     .file("schema.graphqls")
                     .resolvers(Query(linkRepository),
-                            Mutation(linkRepository))
+                            Mutation(linkRepository,userRepository))
                     .build()
                     .makeExecutableSchema()
         }
