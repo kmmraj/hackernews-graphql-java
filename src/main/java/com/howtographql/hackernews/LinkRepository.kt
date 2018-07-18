@@ -12,8 +12,8 @@ class LinkRepository {
     init {
         links = ArrayList()
         //add some links to start off with
-        links.add(Link("http://howtographql.com", "Your favorite GraphQL page!"))
-        links.add(Link("http://graphql.org/learn/", "The official docks!"))
+        links.add(Link("http://howtographql.com", "Your favorite GraphQL page!!"))
+        links.add(Link("http://graphql.org/learn/", "The official docks!!"))
     }
 
     fun saveLink(link: Link) {
