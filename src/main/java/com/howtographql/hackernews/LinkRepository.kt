@@ -1,22 +1,39 @@
 package com.howtographql.hackernews
 
 import java.util.ArrayList
+import com.mongodb.client.MongoCollection
+import com.mongodb.client.model.Filters.eq
+import org.bson.Document
+import org.bson.types.ObjectId
 
-class LinkRepository {
 
-    private val links: MutableList<Link>
+class LinkRepository(private val links: MongoCollection<Document>) {
 
     val allLinks: List<Link>
-        get() = links
+        get() {
+            val allLinks = ArrayList<Link>()
+            for (doc in links.find()) {
+                allLinks.add(link(doc))
+            }
+            return allLinks
+        }
 
-    init {
-        links = ArrayList()
-        //add some links to start off with
-        links.add(Link("http://howtographql.com", "Your favorite GraphQL page!!"))
-        links.add(Link("http://graphql.org/learn/", "The official docks!!"))
+    fun findById(id: String): Link {
+        val doc = links.find(eq("_id", ObjectId(id))).first()
+        return link(doc)
     }
 
     fun saveLink(link: Link) {
-        links.add(link)
+        val doc = Document()
+        doc.append("url", link.url)
+        doc.append("description", link.description)
+        links.insertOne(doc)
+    }
+
+    private fun link(doc: Document): Link {
+        return Link(
+                doc.get("_id").toString(),
+                doc.getString("url"),
+                doc.getString("description"))
     }
 }
