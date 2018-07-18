@@ -1,0 +1,25 @@
+*.iml
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
+/build
+build/
+.idea/**
+.notidea/
+*.DS_Store
+
+
+# Java class files
+*.class
+
+# built native files (uncomment if you build your own)
+# *.o
+# *.so
+
+# generated files
+bin/
+gen/
+
+
+
+
