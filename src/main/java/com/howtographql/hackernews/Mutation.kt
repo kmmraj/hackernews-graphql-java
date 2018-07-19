@@ -2,6 +2,9 @@ package com.howtographql.hackernews
 
 import com.coxautodev.graphql.tools.GraphQLRootResolver
 import graphql.GraphQLException
+import graphql.schema.DataFetchingEnvironment
+
+
 
 
 
@@ -9,11 +12,11 @@ import graphql.GraphQLException
 class Mutation(private val linkRepository: LinkRepository,
                private val userRepository: UserRepository ) : GraphQLRootResolver {
 
-    fun createLink(url: String, description: String): Link {
-        val newLink = Link(id="",url = url, description = description)
-        linkRepository.saveLink(newLink)
-        return newLink
-    }
+//    fun createLink(url: String, description: String): Link {
+//        val newLink = Link(id="",url = url, description = description)
+//        linkRepository.saveLink(newLink)
+//        return newLink
+//    }
 
     fun createUser(name: String, auth: AuthData): User {
         val newUser = User(name, auth.email!!, auth.password!!)
@@ -29,5 +32,12 @@ class Mutation(private val linkRepository: LinkRepository,
             }
         }
         throw GraphQLException("Invalid credentials")
+    }
+
+    fun createLink(url: String, description: String, env: DataFetchingEnvironment): Link {
+        val context = env.getContext<AuthContext>()
+        val newLink = Link(url, description, context.user.id!!)
+        linkRepository.saveLink(newLink)
+        return newLink
     }
 }

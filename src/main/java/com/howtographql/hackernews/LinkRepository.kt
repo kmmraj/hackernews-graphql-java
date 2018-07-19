@@ -27,6 +27,7 @@ class LinkRepository(private val links: MongoCollection<Document>) {
         val doc = Document()
         doc.append("url", link.url)
         doc.append("description", link.description)
+        doc.append("postedBy",link.userId)
         links.insertOne(doc)
     }
 
@@ -34,6 +35,7 @@ class LinkRepository(private val links: MongoCollection<Document>) {
         return Link(
                 doc.get("_id").toString(),
                 doc.getString("url"),
-                doc.getString("description"))
+                doc.getString("description"),
+                doc.getString("postedBy")?:"")
     }
 }

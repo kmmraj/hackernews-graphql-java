@@ -1,11 +1,14 @@
 package com.howtographql.hackernews
 
 import com.coxautodev.graphql.tools.SchemaParser
-import graphql.schema.GraphQLSchema
-import graphql.servlet.SimpleGraphQLServlet
-import javax.servlet.annotation.WebServlet
 import com.mongodb.MongoClient
-import com.mongodb.client.MongoDatabase
+import graphql.schema.GraphQLSchema
+import graphql.servlet.GraphQLContext
+import graphql.servlet.SimpleGraphQLServlet
+import java.util.*
+import javax.servlet.annotation.WebServlet
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 
 
@@ -13,29 +16,48 @@ import com.mongodb.client.MongoDatabase
 @WebServlet(urlPatterns = arrayOf("/graphql"))
 class GraphQLEndpoint : SimpleGraphQLServlet(buildSchema()) {
 
-    init {
-        //Change to `new MongoClient("mongodb://<host>:<port>/hackernews")`
-        //if you don't have Mongo running locally on port 27017
-
+    override fun createContext(request: Optional<HttpServletRequest>,
+                               response: Optional<HttpServletResponse>): GraphQLContext {
+        val user = request
+                .map { req -> req.getHeader("Authorization") }
+                .filter { id -> !id.isEmpty() }
+                .map { id -> id.replace("Bearer ", "") }
+                .map<User> { userRepository.findById(it) }
+                .orElse(null)
+        return AuthContext(user, request, response)
     }
 
+//    override fun filterGraphQLErrors(errors: List<GraphQLError>): List<GraphQLError> {
+//        return errors.stream()
+//                .filter { e -> e is ExceptionWhileDataFetching || super.isClientError(e) }
+//                .map { e -> if (e is ExceptionWhileDataFetching) SanitizedError(e) else e }
+//                .collect<List<GraphQLError>, Any>(Collectors.toList())
+//    }
 
     companion object {
-        fun buildSchema(): GraphQLSchema {
-            val mongo =  MongoClient().getDatabase("hackernews")
-            val linkRepository =   LinkRepository(mongo.getCollection("links"))
 
-            val userRepository = UserRepository(mongo.getCollection("users"))
+        private val linkRepository: LinkRepository
+        private val userRepository: UserRepository
+//        private val voteRepository: VoteRepository
 
+        init {
+            val mongo = MongoClient().getDatabase("hackernews")
+            linkRepository = LinkRepository(mongo.getCollection("links"))
+            userRepository = UserRepository(mongo.getCollection("users"))
+//            voteRepository = VoteRepository(mongo.getCollection("votes"))
+        }
 
+        private fun buildSchema(): GraphQLSchema {
             return SchemaParser.newParser()
                     .file("schema.graphqls")
-                    .resolvers(Query(linkRepository),
-                            Mutation(linkRepository,userRepository),
-                            SigninResolver())
+                    .resolvers(
+                            Query(linkRepository),
+                            Mutation(linkRepository, userRepository),
+                            SigninResolver(),
+                            LinkResolver(userRepository))
+                  //  .scalars(Scalars.dateTime)
                     .build()
                     .makeExecutableSchema()
         }
     }
-
 }
