@@ -38,13 +38,13 @@ class GraphQLEndpoint : SimpleGraphQLServlet(buildSchema()) {
 
         private val linkRepository: LinkRepository
         private val userRepository: UserRepository
-//        private val voteRepository: VoteRepository
+        private val voteRepository: VoteRepository
 
         init {
             val mongo = MongoClient().getDatabase("hackernews")
             linkRepository = LinkRepository(mongo.getCollection("links"))
             userRepository = UserRepository(mongo.getCollection("users"))
-//            voteRepository = VoteRepository(mongo.getCollection("votes"))
+            voteRepository = VoteRepository(mongo.getCollection("votes"))
         }
 
         private fun buildSchema(): GraphQLSchema {
@@ -52,10 +52,11 @@ class GraphQLEndpoint : SimpleGraphQLServlet(buildSchema()) {
                     .file("schema.graphqls")
                     .resolvers(
                             Query(linkRepository),
-                            Mutation(linkRepository, userRepository),
+                            Mutation(linkRepository, userRepository, voteRepository),
                             SigninResolver(),
-                            LinkResolver(userRepository))
-                  //  .scalars(Scalars.dateTime)
+                            LinkResolver(userRepository),
+                            VoteResolver(linkRepository, userRepository))
+                    .scalars(Scalars.dateTime)
                     .build()
                     .makeExecutableSchema()
         }

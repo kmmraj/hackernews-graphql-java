@@ -3,6 +3,11 @@ package com.howtographql.hackernews
 import com.coxautodev.graphql.tools.GraphQLRootResolver
 import graphql.GraphQLException
 import graphql.schema.DataFetchingEnvironment
+import java.time.ZoneOffset
+import java.time.Instant
+import java.time.ZonedDateTime
+
+
 
 
 
@@ -10,7 +15,8 @@ import graphql.schema.DataFetchingEnvironment
 
 
 class Mutation(private val linkRepository: LinkRepository,
-               private val userRepository: UserRepository ) : GraphQLRootResolver {
+               private val userRepository: UserRepository,
+               private val voteRepository: VoteRepository) : GraphQLRootResolver {
 
 //    fun createLink(url: String, description: String): Link {
 //        val newLink = Link(id="",url = url, description = description)
@@ -39,5 +45,10 @@ class Mutation(private val linkRepository: LinkRepository,
         val newLink = Link(url, description, context.user.id!!)
         linkRepository.saveLink(newLink)
         return newLink
+    }
+
+    fun createVote(linkId: String, userId: String): Vote {
+        val now = Instant.now().atZone(ZoneOffset.UTC)
+        return voteRepository.saveVote(Vote(now, userId, linkId))
     }
 }
