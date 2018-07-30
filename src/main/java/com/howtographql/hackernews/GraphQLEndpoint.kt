@@ -2,10 +2,13 @@ package com.howtographql.hackernews
 
 import com.coxautodev.graphql.tools.SchemaParser
 import com.mongodb.MongoClient
+import graphql.ExceptionWhileDataFetching
+import graphql.GraphQLError
 import graphql.schema.GraphQLSchema
 import graphql.servlet.GraphQLContext
 import graphql.servlet.SimpleGraphQLServlet
 import java.util.*
+import java.util.stream.Collectors
 import javax.servlet.annotation.WebServlet
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -27,12 +30,12 @@ class GraphQLEndpoint : SimpleGraphQLServlet(buildSchema()) {
         return AuthContext(user, request, response)
     }
 
-//    override fun filterGraphQLErrors(errors: List<GraphQLError>): List<GraphQLError> {
-//        return errors.stream()
-//                .filter { e -> e is ExceptionWhileDataFetching || super.isClientError(e) }
-//                .map { e -> if (e is ExceptionWhileDataFetching) SanitizedError(e) else e }
-//                .collect<List<GraphQLError>, Any>(Collectors.toList())
-//    }
+    override fun filterGraphQLErrors(errors: List<GraphQLError>): List<GraphQLError> {
+        return errors.stream()
+                .filter { e -> e is ExceptionWhileDataFetching || super.isClientError(e) }
+                .map { e -> if (e is ExceptionWhileDataFetching) SanitizedError(e) else e }
+                .collect(Collectors.toList())
+    }
 
     companion object {
 
