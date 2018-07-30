@@ -7,6 +7,11 @@ import org.bson.types.ObjectId
 import org.bson.conversions.Bson
 import java.util.*
 import java.util.Optional.ofNullable
+import com.mongodb.client.FindIterable
+import java.util.ArrayList
+import java.util.Optional.ofNullable
+
+
 
 
 
@@ -48,6 +53,17 @@ class LinkRepository(private val links: MongoCollection<Document>) {
 
         val allLinks = ArrayList<Link>()
         for (doc in mongoFilter.map{ links.find() }.orElseGet{ links.find() }) {
+            allLinks.add(link(doc))
+        }
+        return allLinks
+    }
+
+    fun getAllLinks(filter: LinkFilter, skip: Int, first: Int): List<Link> {
+        val mongoFilter = Optional.ofNullable(filter).map{ this.buildFilter(it) }
+
+        val allLinks = ArrayList<Link>()
+        val documents = mongoFilter.map{ links.find() }.orElseGet{ links.find() }
+        for (doc in documents.skip(skip).limit(first)) {
             allLinks.add(link(doc))
         }
         return allLinks

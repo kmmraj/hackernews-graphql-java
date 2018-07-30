@@ -12,4 +12,8 @@ class Query(private val linkRepository: LinkRepository) : GraphQLRootResolver {
         filter?.let { return linkRepository.getAllLinks(filter) }
         return allLinks()
     }
+
+    fun allLinks(filter: LinkFilter, skip: Number, first: Number): List<Link> {
+        return linkRepository.getAllLinks(filter, skip.toInt(), first.toInt())
+    }
 }
